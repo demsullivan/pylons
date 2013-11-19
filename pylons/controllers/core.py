@@ -7,6 +7,8 @@ from webob.exc import HTTPException, HTTPNotFound
 
 import pylons
 
+from js.bootstrap import bootstrap_css
+
 __all__ = ['WSGIController']
 
 log = logging.getLogger(__name__)
@@ -210,6 +212,9 @@ class WSGIController(object):
             response = self._inspect_call(self.__before__)
             if hasattr(response, '_exception'):
                 return response(environ, self.start_response)
+
+        if pylons.config['use_bootstrap']:
+            bootstrap_css.need()
 
         response = self._dispatch_call()
         if not start_response_called:

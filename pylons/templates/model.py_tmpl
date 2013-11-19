@@ -1,0 +1,8 @@
+{{importstatement}}
+
+class {{name}}(Model):
+    __tablename__ = '{{tablename}}'
+    id = Column(Integer, primary_key=True)
+{{for name, type in fields.items()}}
+    {{name}} = Column({{type}})
+{{endfor}}

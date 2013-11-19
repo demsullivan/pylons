@@ -174,7 +174,6 @@ class PylonsTemplate(Template):
         vars['zip_safe'] = asbool(vars.get('zip_safe', 'false'))
         vars['sqlalchemy'] = asbool(vars.get('sqlalchemy', 'false'))
 
-
 class MinimalPylonsTemplate(PylonsTemplate):
     _template_dir = ('pylons', 'templates/minimal_project')
     summary = 'Pylons minimal application template'

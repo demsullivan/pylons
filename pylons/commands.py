@@ -52,7 +52,7 @@ from tempita import paste_script_template_renderer
 import pylons
 import pylons.util as util
 
-__all__ = ['ControllerCommand', 'RestControllerCommand', 'ShellCommand']
+__all__ = ['ControllerCommand', 'RestControllerCommand', 'ShellCommand', 'ModelCommand']
 
 
 def can_import(name):
@@ -589,3 +589,100 @@ class ShellCommand(Command):
                 shell.interact(banner)
             finally:
                 paste.registry.restorer.restoration_end()
+
+class ModelCommand(Command):
+    """Create a Model and accompanying functional tst
+
+    The Model command will create the standard model template
+    file and associated functional test to speed creation of
+    models.
+
+    Example usage::
+
+        yourproj% paster model User id:Integer first_name:String(50) last_name:String(50)
+        Creating yourproj/yourproj/model/user.py
+        Creating yourproj/yourproj/tests/functional/test_model_user.py
+
+    If you'd like to have models underneath a directory, just
+    include the path as the controller name and the necessary
+    directories will be created for you::
+
+        yourproj% paster model base/User id:Integer first_name:String(50) last_name:String(50)
+        Creating yourproj/yourproj/model/base/user.py
+        Creating yourproj/yourproj/model/base/__init__.py
+        Creating yourproj/yourproj/tests/functional/test_model_base_user.py
+
+    """
+    summary = __doc__.splitlines()[0]
+    usage = '\n' + __doc__
+
+    min_args = 1
+    max_args = 20
+    group_name = 'pylons'
+
+    default_verbosity = 3
+
+    parser = Command.standard_parser(simulate=True)
+    parser.add_option('--no-test',
+                      action='store_true',
+                      dest='no_test',
+                      help="Don't create the test; just the model")
+
+    def command(self):
+        try:
+            file_op = FileOp(source_dir=('pylons', 'templates'))
+            try:
+                name, directory = file_op.parse_path_name_args(self.args[0])
+            except:
+                raise BadCommand('No egg_info directory was found')
+
+            base_package = file_op.find_dir('model', True)[0]
+            if base_package.lower() == name.lower():
+                raise BadCommand('Your moedl name should not be the same as '
+                                 'the package name %r.' % base_package)
+            name = name.replace('-', '_')
+
+            if not is_minimal_template(base_package):
+                importstatement = 'from %s.model.meta import *' % base_package
+
+            fullname = os.path.join(directory, name)
+            model_name = util.class_name_from_module_name(name.split('/')[-1])
+            if not fullname.startswith(os.sep):
+                fullname = os.sep + fullname
+
+            module_dir = directory.replace('/', os.path.sep)
+
+            fields = {}
+            for arg in self.args[1:]:
+                field_args = arg.split(':')
+                field_name = field_args[0]
+
+                if field_args[1] != 'ForeignKey':
+                    if len(field_args) == 2:
+                        field_type = field_args[1]
+                    elif len(field_args) == 3:
+                        field_type = "%s(%s)" % (field_args[1], field_args[2])
+
+                fields[field_name] = field_type
+
+            file_op.template_vars.update(
+                {'name': model_name,
+                 'tablename': name,
+                 'importstatement': importstatement,
+                 'fields': fields})
+            file_op.copy_file(template='model.py_tmpl',
+                              dest=os.path.join('model', directory),
+                              filename=name,
+                              template_renderer=paste_script_template_renderer)
+            model_directory = file_op.find_dir('model', True)[1]
+            self.insert_into_file(os.path.join(model_directory, '__init__.py'), 'model_declaration',
+                                  'from %s.model.%s import %s\n' % (base_package, name, model_name))
+
+            self.run_command('alembic', 'revision', '--autogenerate', '-m', 'add %s model' % model_name)
+
+        except BadCommand, e:
+            raise BadCommand('An error occurred. %s' % e)
+        except:
+            msg = str(sys.exc_info()[1])
+            raise BadCommand('An unknown error occurred. %s' % msg)
+            

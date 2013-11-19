@@ -3,13 +3,35 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-__all__ = ['Base', 'Session']
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.types import BigInteger, Boolean, Date, DateTime, Enum, Float, Integer, \
+    Interval, LargeBinary, Numeric, PickleType, SchemaType, SmallInteger, String, \
+    Text, Time, Unicode, UnicodeText
+from sqlalchemy.types import BIGINT, BINARY, BLOB, BOOLEAN, CHAR, CLOB, DATE, DATETIME, \
+    DECIMAL, FLOAT, INT, INTEGER, NCHAR, NVARCHAR, NUMERIC, REAL, SMALLINT, TEXT, TIME, \
+    TIMESTAMP, VARBINARY, VARCHAR
+from sqlalchemy.orm import relation, backref
+
+__all__ = ['Model', 'Session', 'Column', 'ForeignKey', 'BigInteger', 'Boolean', 'Date',
+           'DateTime', 'Enum', 'Float', 'Integer', 'Interval', 'LargeBinary', 'Numeric',
+           'PickleType', 'SchemaType', 'SmallInteger', 'String', 'Text', 'Time', 'Unicode',
+           'UnicodeText', 
+           'BIGINT', 'BINARY', 'BLOB', 'BOOLEAN', 'CHAR', 'CLOB', 'DATE', 'DATETIME',
+           'DECIMAL', 'FLOAT', 'INT', 'INTEGER', 'NCHAR', 'NVARCHAR', 'REAL', 'SMALLINT',
+           'TEXT', 'TIME', 'TIMESTAMP', 'VARBINARY', 'VARCHAR', 'relation', 'backref']
 
 # SQLAlchemy session manager. Updated by model.init_model()
 Session = scoped_session(sessionmaker())
 
 # The declarative Base
 Base = declarative_base()
+
+class Model(Base):
+    __abstract__ = True
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+	    setattr(self, key, value)
+
 {{else}}
 {{skip_template()}}
 {{endif}}

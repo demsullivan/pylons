@@ -7,7 +7,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-version = '1.0.1'
+version = '1.0.2'
 
 tests_require = ['nose', 'Jinja2>=2.2.1']
 if not sys.platform.startswith('java'):
@@ -119,7 +119,8 @@ with BitBucket hosting the main repository here:
         "FormEncode>=1.2.4", "simplejson>=2.2.1", "decorator>=3.3.2",
         "nose>=1.1.2", "Mako>=0.5.0", "WebError>=0.10.3",
         "WebTest>=1.3.1", "Tempita>=0.5.1", "MarkupSafe>=0.15",
-        "WebOb>=1.1.1",
+        "WebOb>=1.1.1", "alembic>=0.6.0", "fanstatic>=1.0a4",
+        "js.jquery>=1.9.1", "js.bootstrap>=3.0.0.1",
     ],
     dependency_links=[
         "http://www.pylonshq.com/download/1.0"
@@ -146,6 +147,7 @@ with BitBucket hosting the main repository here:
     restcontroller = pylons.commands:RestControllerCommand
     routes = pylons.commands:RoutesCommand
     shell = pylons.commands:ShellCommand
+    model = pylons.commands:ModelCommand
 
     [paste.paster_create_template]
     pylons = pylons.util:PylonsTemplate
