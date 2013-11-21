@@ -81,6 +81,9 @@ def class_name_from_module_name(module_name):
     words = module_name.replace('-', '_').split('_')
     return ''.join(w.title() for w in words)
 
+def module_name_from_class_name(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 class PylonsContext(object):
     """Pylons context object

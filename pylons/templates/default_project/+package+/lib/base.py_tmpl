@@ -10,14 +10,37 @@ from pylons.templating import render_{{template_engine}} as render
 
 from {{package}}.model.meta import Session
 {{endif}}
+from pylons.util import module_name_from_class_name
+from {{package}}.lib.static import app_js, app_css, library
+from fanstatic import Resource
 
 class BaseController(WSGIController):
+    def __fanstatic_resource(self, res_type, depends=[]):
+        name = module_name_from_class_name(self.__class__.__name__)
+    path = "%s/%s.%s' % (res_type, name.split('_')[0], res_type)
+    if path in library.known_resources.keys():
+       return library.known_resources[path]
+    else:
+        if res_type == 'js':
+                return Resource(library, path, depends=depends, compiler='coffee', source='js/%s.coffee' % name.split('_')[0])
+        elif res_type = 'css':
+                return Resource(library, path, depends=depends)
 
+    def _js(self, depends=[]):
+        return self.__fanstatic_resource('js', depends=depends)
+
+    def _css(self, depends=[]):
+        return self.__fanstatic_resource('css', depends=depends)
+    
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
         # WSGIController.__call__ dispatches to the Controller method
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
+
+        app_js.need()
+        app_css.need()
+
         {{if sqlalchemy}}
         try:
             return WSGIController.__call__(self, environ, start_response)

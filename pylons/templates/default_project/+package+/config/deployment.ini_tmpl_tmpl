@@ -19,6 +19,8 @@ use = egg:{{project}}
 full_stack = true
 static_files = true
 
+use_bootstrap = true
+
 cache_dir = %(here)s/data
 beaker.session.key = {{package}}
 beaker.session.secret = ${app_instance_secret}
