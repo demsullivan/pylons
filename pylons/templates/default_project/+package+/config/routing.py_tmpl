@@ -20,6 +20,7 @@ def make_map(config):
 
     # CUSTOM ROUTES HERE
 
+    map.connect("/%s/{file:.*}" % config['fanstatic_prefix'], controller='pylons.controllers.static:FanstaticCOntroller')
     map.connect('/{controller}/{action}')
     map.connect('/{controller}/{action}/{id}')
 

@@ -167,6 +167,10 @@ class ControllerCommand(Command):
                       action='store_true',
                       dest='no_test',
                       help="Don't create the test; just the controller")
+    parser.add_option('--no-js',
+                      action='store_true',
+                      dest='no_js',
+                      help="Don't generate controller CoffeeScript")
 
     def command(self):
         """Main command to create controller"""
@@ -224,6 +228,13 @@ class ControllerCommand(Command):
                     dest=os.path.join('tests', 'functional'),
                     filename='test_' + testname,
                     template_renderer=paste_script_template_renderer)
+            if not self.options.no_js:
+                file_op.copy_file(
+                    template='controller.coffee_tmpl',
+                    dest=os.path.join('public', 'assets', 'js'),
+                    filename=name + '.coffee',
+                    template_renderer=paste_script_template_renderer)
+
         except BadCommand, e:
             raise BadCommand('An error occurred. %s' % e)
         except:

@@ -6,10 +6,9 @@ from paste.urlparser import StaticURLParser
 from paste.deploy.converters import asbool
 from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
-from pylons.coffeecup import CoffeeScriptMiddleware
 from routes.middleware import RoutesMiddleware
 
-from fanstatic import Fanstatic
+from fanstatic import Injector
 
 from {{package}}.config.environment import load_environment
 
@@ -45,7 +44,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     # Routing/Session Middleware
     app = RoutesMiddleware(app, config['routes.map'], singleton=False)
     app = SessionMiddleware(app, config)
-    app = Fanstatic(app)
+    app = Injector(app, publisher_signature=config['fanstatic_prefix'])
 
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
 
@@ -66,7 +65,6 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     if asbool(static_files):
         # Serve static files
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
-	static_app = CoffeeScriptMiddleware(static_app, config)
 
         app = Cascade([static_app, app])
     app.config = config

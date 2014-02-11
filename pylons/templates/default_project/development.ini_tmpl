@@ -23,6 +23,7 @@ static_files = true
 # Uncomment this line to enable the Twitter Bootstrap CSS
 # library globally in your project.
 # use_bootstrap = true
+fanstatic_prefix = static
 
 cache_dir = %(here)s/data
 beaker.session.key = {{package}}
